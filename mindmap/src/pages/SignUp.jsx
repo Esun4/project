@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function SignUp() {
   const [form, setForm] = useState({
-    fullName: "",
+    name: "",
     username: "",
     email: "",
     password: "",
@@ -13,7 +13,7 @@ export default function SignUp() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
@@ -21,17 +21,27 @@ export default function SignUp() {
       return;
     }
 
-    console.log("Sign Up Data:", form);
+    const data = {
+      name: form.name,
+      username: form.username,
+      email: form.email,
+      password: form.password,
+    };
+
     //  POST to backend HERE
 
-    /*Signup sends:
-    {
-        "fullName": "John Doe",
-        "username": "johndoe",
-        "email": "john@email.com",
-        "password": "password123"
-    }
-    */
+    // turns the data into plain text JSON
+    const toJson = JSON.stringify(data);
+    
+    const res = await fetch ("http://localhost:3000/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: toJson,
+    });
+
+    
   }
 
   return (
@@ -40,9 +50,9 @@ export default function SignUp() {
 
       <form onSubmit={handleSubmit}>
         <input
-          name="fullName"
+          name="name"
           placeholder="Full Name"
-          value={form.fullName}
+          value={form.name}
           onChange={handleChange}
           required
         />
