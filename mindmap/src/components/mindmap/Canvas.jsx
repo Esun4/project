@@ -42,6 +42,16 @@ export default function Canvas() {
     setZoom((z) => Math.max(z - 0.1, 0.3));
   }
 
+  function onWheel(e) {
+  e.preventDefault();
+
+  const zoomSpeed = 0.001;
+  const newZoom = zoom - e.deltaY * zoomSpeed;
+
+  setZoom(Math.min(Math.max(newZoom, 0.3), 3));
+  }
+
+
   /* ---------- NODE MOVE ---------- */
   function moveNode(id, dx, dy) {
     setNodes((nodes) =>
@@ -58,6 +68,7 @@ export default function Canvas() {
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
+      onWheel={onWheel}
       style={{
         flex: 1,
         background: "#020617",
