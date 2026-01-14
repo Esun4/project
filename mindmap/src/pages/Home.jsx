@@ -9,7 +9,7 @@ export default function Home() {
       <p>hi </p>
 
       <div className="home-buttons">
-        <button onClick={() => navigate("/dashboard")}>sign in</button>
+        <button onClick={() => navigate("/signin")}>sign in</button>
         <button onClick={() => navigate("/signup")}>sign up</button>
       </div>
     </div>
