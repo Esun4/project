@@ -1,6 +1,4 @@
-import addNode from "./useMindMap";
-
-export default function ToolBar() {
+export default function Toolbar({ addNode }) {
   return (
     <div
       style={{
@@ -12,7 +10,10 @@ export default function ToolBar() {
         gap: "1rem",
       }}
     >
-      <button onClick={addNode}>Add Node</button>
+      <button onClick={() => addNode(200, 200)}>
+        Add Node
+      </button>
+
       <button>Connect</button>
       <button>Save</button>
     </div>
