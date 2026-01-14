@@ -10,18 +10,29 @@ export default function SignIn() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    console.log("Sign In Data:", form);
-    // backend decides if its username or email based login (do the backend here)
-    // for backend just check if identifier.includes("a") => email, else => username
-    /* Signin sends:
-    {
-        "identifier": "johndoe OR john@email.com",
-        "password": "password123"
+    const res = await fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ 
+        emailOrUsername: form.identifier,
+        password: form.password,
+       }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // data error returns "Invalid credentials"
+      alert(data.error || "Login failed");
+      return;
     }
-    */
+
+    console.log("Logged in user:", data);
+
   }
 
   return (

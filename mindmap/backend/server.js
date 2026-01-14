@@ -24,6 +24,24 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(session({
+    // cookie info (session info will go inside the cookie)
+    name: "sid",
+    // ****** This needs to be changed when hosting the web app ******************************************************************
+    secret: process.env.SESSION_SECRET || "dev_secret_change_me",
+    // ****** This needs to be changed when hosting the web app ******************************************************************
+    // eventually, put a secret in a .env, pass it into docker and remove the fallback (line above)
+    // ex. SESSION_SECRET=super_long_random_string_here
+    // secret: process.env.SESSION_SECRET
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+    },
+}));
+
 
 app.get("/health", (req, res) => {
     res.json({ ok: true });
@@ -73,6 +91,64 @@ app.post("/auth/signup", async (req, res) => {
         });
     } catch (err) {
         console.error("Signup error:", err);
+        return res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.post("/auth/login", async (req, res) => {
+    try {
+        const { emailOrUsername, password } = req.body;
+
+        if (!emailOrUsername || !password) {
+            return res.status(400).json({ error: "Missing credentials" });
+        }
+
+        // find the user by their email or by their username
+        const result = await pool.query(
+            "SELECT id, name, username, email, password_hash FROM users WHERE email = $1 OR username = $1",
+            [emailOrUsername]
+        );
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+        const user = result.rows[0];
+
+        // compare password to hashed one matching the username
+        const ok = await bcrypt.compare(password, user.password_hash);
+        if (!ok) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        // create the session
+        req.session.userId = user.id;
+
+        // return the user info (not password)
+        return res.json({
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+        });
+    } catch (err) {
+        console.error("Login error:", err);
+        return res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.get("/auth/me", async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: "Not logged in" });
+        }
+
+        const result = await pool.query(
+            "SELECT id, name, username, email FROM users WHERE id = $1",
+            [req.session.userId]
+        );
+
+        return res.json(result.rows[0]);
+    } catch (err) {
+        console.error("Me error:", err);
         return res.status(500).json({ error: "Server error" });
     }
 });

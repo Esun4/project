@@ -5,11 +5,11 @@ export default function Home() {
 
   return (
     <div className="home">
-      <h1>bruh</h1>
-      <p>hello ethan</p>
+      <h1>test</h1>
+      <p>hi </p>
 
       <div className="home-buttons">
-        <button onClick={() => navigate("/signin")}>sign in</button>
+        <button onClick={() => navigate("/dashboard")}>sign in</button>
         <button onClick={() => navigate("/signup")}>sign up</button>
       </div>
     </div>
