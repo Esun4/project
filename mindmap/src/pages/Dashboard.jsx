@@ -4,8 +4,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const mindmaps = [
-    { id: "1", title: "Biology Notes" },
-    { id: "2", title: "Startup Ideas" },
+    { id: "1", title: "random mindmap1" },
+    { id: "2", title: "random mindmap2" },
   ];
 
   return (
