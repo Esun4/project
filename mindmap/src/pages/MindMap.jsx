@@ -39,8 +39,9 @@ const initialState = {
   edges: [],
 };
 
+// Flow inner wrapper component (wraps entire function)
 function FlowInner() {
-  const { id } = useParams(); // Now accessible via FlowInner
+  const { id } = useParams();
   const { screenToFlowPosition } = useReactFlow();
   const [state, { set, undo, redo, canUndo, canRedo }] = useUndo(initialState);
   const { nodes, edges } = state.present || { nodes: [], edges: [] };
@@ -53,10 +54,9 @@ function FlowInner() {
   const handleSaveSnapshot = useCallback(async () => {
     if (reactFlowWrapper.current === null) return;
 
-    // 1. Capture the flow as an image
+    // capture snapshot as png
     const dataUrl = await toPng(reactFlowWrapper.current, {
       backgroundColor: '#ffffff',
-      // We exclude controls/minimap from the thumbnail for a cleaner look
       filter: (node) => {
         if (
           node?.classList?.contains('react-flow__controls') ||
@@ -218,11 +218,11 @@ function FlowInner() {
         <NodeInspector node={selectedNode} updateNode={(u) => set({ nodes: nodes.map(n => n.id === selectedNodeId ? {...n, data: {...n.data, ...u}} : n), edges })} />
         <EdgeInspector edge={selectedEdge} updateEdge={(u) => set({ nodes, edges: edges.map(e => e.id === selectedEdgeId ? {...e, ...u} : e) })} />
 
-        {/* --- CONTEXT MENU JSX --- */}
+        /* --- CONTEXT MENU JSX --- */
         {contextMenu.visible && (
           <div
             style={{
-              position: 'fixed', // Changed to fixed to ensure it stays on top of the UI
+              position: 'fixed',
               top: contextMenu.y,
               left: contextMenu.x,
               background: '#ffffff',
