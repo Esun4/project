@@ -12,6 +12,7 @@ import {
   ReactFlowProvider
 } from '@xyflow/react';
 import useUndo from 'use-undo';
+import { toPng } from 'html-to-image';
 
 // Styles
 import '@xyflow/react/dist/style.css';
@@ -48,6 +49,50 @@ function FlowInner() {
   const [selectedEdgeId, setSelectedEdgeId] = useState(null);
   const reactFlowWrapper = useRef(null);
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, nodeId: null });
+
+  const handleSaveSnapshot = useCallback(async () => {
+    if (reactFlowWrapper.current === null) return;
+
+    // 1. Capture the flow as an image
+    const dataUrl = await toPng(reactFlowWrapper.current, {
+      backgroundColor: '#ffffff',
+      // We exclude controls/minimap from the thumbnail for a cleaner look
+      filter: (node) => {
+        if (
+          node?.classList?.contains('react-flow__controls') ||
+          node?.classList?.contains('react-flow__minimap')
+        ) {
+          return false;
+        }
+        return true;
+      },
+    });
+
+    console.log("Snapshot generated!");
+
+    // ---------------------------------------------------------
+    // DATABASE LOGIC START
+    // ---------------------------------------------------------
+    // This is where you will send 'dataUrl' (the image) and 
+    // the 'state.present' (nodes/edges) to your backend.
+    //
+    // Example:
+    // await supabase.from('mindmaps').update({ 
+    //    content: state.present, 
+    //    thumbnail: dataUrl 
+    // }).eq('id', id);
+    // ---------------------------------------------------------
+    // DATABASE LOGIC END
+    // ---------------------------------------------------------
+    
+  }, [state.present, id]);
+
+  // Auto-save logic 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+    }, 3000); 
+    return () => clearTimeout(timer);
+  }, [nodes, edges, handleSaveSnapshot]);
 
   // --- Logic Handlers ---
 

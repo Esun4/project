@@ -1,0 +1,127 @@
+/* Dashboard.css */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  padding: 60px 10%;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 60px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.dashboard-title {
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.create-btn {
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  background: #333333;
+}
+
+.mindmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Slightly wider for previews */
+  gap: 30px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Updated Card Layout */
+.mindmap-card {
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 20px; 
+  height: 300px; /* Taller to fit the preview + title */
+  display: flex;
+  flex-direction: column; /* Stack preview on top of info */
+  overflow: hidden; /* Clips the preview to the rounded corners */
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.mindmap-card:hover {
+  transform: scale(1.02);
+  border-color: #000000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* The Top Preview Section */
+.card-preview {
+  flex: 1; /* Takes up all available space top-down */
+  background: #fcfcfc; /* Very light grey to look like a canvas */
+  position: relative;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The Bottom Info Section */
+.card-info {
+  padding: 20px 24px;
+  background: white;
+  position: relative;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Minimalist Dot Hint */
+.mindmap-card::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 6px;
+  height: 6px;
+  background: #000000;
+  border-radius: 50%;
+  opacity: 0.2;
+  z-index: 2;
+  transition: opacity 0.3s ease;
+}
+
+.mindmap-card:hover::before {
+  opacity: 1;
+}
+
+/* Placeholder image styling */
+.card-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This makes the zoomed-out look possible */
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.mindmap-card:hover .card-preview img {
+  opacity: 1;
+}
