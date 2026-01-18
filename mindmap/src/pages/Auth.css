@@ -1,22 +1,24 @@
 .auth-page {
-  position: relative; /* Necessary for absolute logo placement */
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
+  /* UPDATED: Background variable */
+  background-color: var(--bg-color);
   font-family: 'Quicksand', sans-serif;
 }
 
 .auth-logo {
   position: absolute;
   top: 40px;
-  left: 10%; /* Matches your home page padding */
+  left: 10%;
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: -1px;
   text-decoration: none;
-  color: #1a1a1a;
+  /* UPDATED: Text color variable */
+  color: var(--text-color);
   transition: opacity 0.2s ease;
 }
 
@@ -24,13 +26,13 @@
   opacity: 0.7;
 }
 
-/* Ensure the card looks consistent with the dashboard */
 .auth-card {
   width: 100%;
   max-width: 400px;
   padding: 40px;
-  background: white;
-  border: 1px solid #eaeaea;
+  /* UPDATED: Background and Border variables */
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
@@ -57,7 +59,8 @@
   font-weight: 700;
   margin-bottom: 8px;
   letter-spacing: -1px;
-  color: #1a1a1a;
+  /* UPDATED: Text color variable */
+  color: var(--text-color);
 }
 
 .auth-subtitle {
@@ -76,7 +79,10 @@
   width: 100%;
   padding: 14px 20px;
   border-radius: 12px;
-  border: 1px solid #eaeaea;
+  /* UPDATED: Input background, text, and border variables */
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   font-family: 'Quicksand', sans-serif;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -85,8 +91,9 @@
 
 .auth-input:focus {
   outline: none;
-  border-color: #000000;
-  background-color: #fafafa;
+  /* UPDATED: Focus state uses text color for border */
+  border-color: var(--text-color);
+  opacity: 0.9;
 }
 
 .auth-btn {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
 
-export default function SignIn({ setUser }) {
+export default function SignIn({ setUser, isDarkMode }) {
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

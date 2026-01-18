@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
-export default function Dashboard() {
+export default function Dashboard({ isDarkMode, toggleTheme }) {
   const navigate = useNavigate();
 
   const mindmaps = [
@@ -13,9 +13,14 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1 className="dashboard-title">My Workspace</h1>
-        <button className="create-btn" onClick={() => navigate("/mindmap/new")}> 
-          + New Project
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="mm-button" onClick={toggleTheme}>
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+          <button className="create-btn" onClick={() => navigate("/mindmap/new")}> 
+            + New Project
+          </button>
+        </div>
       </header>
 
       <ul className="mindmap-grid">

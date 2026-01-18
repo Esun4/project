@@ -39,7 +39,7 @@ const initialState = {
   edges: [],
 };
 
-function FlowInner() {
+function FlowInner({ isDarkMode, toggleTheme, user }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { screenToFlowPosition } = useReactFlow();
@@ -60,6 +60,37 @@ function FlowInner() {
 
   const [toast, setToast] = useState({ message: '', visible: false });
   const [bgConfig, setBgConfig] = useState({ variant: 'dots', color: '#ffffff' });
+
+
+  useEffect(() => {
+    setBgConfig(prev => ({
+      ...prev,
+      color: isDarkMode ? '#121212' : '#ffffff'
+    }));
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    // This function runs every time isDarkMode changes
+    // It maps through existing nodes/edges and flips their hardcoded data colors
+    set({
+      nodes: nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          color: isDarkMode ? '#1a1a1a' : '#ffffff',
+          borderColor: isDarkMode ? '#ffffff' : '#000000',
+          textColor: isDarkMode ? '#ffffff' : '#000000',
+        }
+      })),
+      edges: edges.map((edge) => ({
+        ...edge,
+        style: {
+          ...edge.style,
+          stroke: isDarkMode ? '#ffffff' : '#000000',
+        }
+      }))
+    }, false); // 'false' prevents this from creating an entry in Undo history
+  }, [isDarkMode]); // Watch for theme toggles
 
   const showToast = (msg) => {
     // Reset state for a new toast
@@ -191,11 +222,18 @@ function FlowInner() {
   );
 
   const onConnect = useCallback((params) => {
-    takeSnapshot(); // Add this
-    const edgeData = { ...params, type: 'smoothstep', style: { stroke: '#000', strokeWidth: 2 } };
+    takeSnapshot();
+    const edgeData = { 
+      ...params, 
+      type: 'smoothstep', 
+      style: { 
+        stroke: isDarkMode ? '#ffffff' : '#000000', // Dynamic edge color
+        strokeWidth: 2 
+      } 
+    };
     set({ nodes, edges: addEdge(edgeData, edges) });
-  }, [nodes, edges, set, takeSnapshot]);
-
+  }, [nodes, edges, isDarkMode, set, takeSnapshot]);
+  
   const onReconnect = useCallback(
     (oldEdge, newConnection) => {
       // This replaces the old edge with a new one containing the updated connection
@@ -258,14 +296,24 @@ function FlowInner() {
   const onAddNodeAtPosition = (clientX, clientY) => {
     takeSnapshot();
     const position = screenToFlowPosition({ x: clientX, y: clientY });
-    const maxId = nodes.reduce((max, node) => {
-      const num = parseInt(node.id.replace('n', '')) || 0;
-      return num > max ? num : max;
-    }, 0);
-    const newId = `n${maxId + 1}`;
+    
+    // Dynamic Defaults
+    const dynamicNodeDefaults = {
+      ...NODE_DEFAULTS,
+      color: isDarkMode ? '#1a1a1a' : '#ffffff',
+      borderColor: isDarkMode ? '#ffffff' : '#000000',
+      textColor: isDarkMode ? '#ffffff' : '#000000',
+    };
+
+    const newId = `n${nodes.length + 1}`; // Simple ID logic
 
     set({
-      nodes: [...nodes, { id: newId, type: 'editable', position, data: { ...NODE_DEFAULTS, label: 'empty node' } }],
+      nodes: [...nodes, { 
+        id: newId, 
+        type: 'editable', 
+        position, 
+        data: { ...dynamicNodeDefaults, label: 'empty node' } 
+      }],
       edges,
     });
   };
@@ -296,7 +344,7 @@ function FlowInner() {
   }, [undo, redo]);
 
   return (
-    <div className="mindmap-page-wrapper">
+    <div className={`mindmap-page-wrapper ${isDarkMode ? 'dark-mode' : ''}`}>
       <header className="mindmap-topbar">
         <div className="topbar-left">
           <button className="mm-button" onClick={() => navigate('/dashboard')}>
@@ -305,7 +353,6 @@ function FlowInner() {
           <h2 className="topbar-title">{id}</h2>
         </div>
 
-        {/* NEW CENTER SECTION */}
         <div className="topbar-center">
           <button 
             className="mm-button mm-button-primary save-btn" 
@@ -316,8 +363,9 @@ function FlowInner() {
         </div>
 
         <div className="topbar-right">
-          {/* You can keep this empty or move other tools here (like User Profile icon) */}
-          <div style={{ width: '80px' }}></div> 
+          <button className="mm-button" onClick={toggleTheme}>
+            {isDarkMode ? '☀️ Light' : '🌙 Dark'}
+          </button>
         </div>
       </header>
 
@@ -341,8 +389,8 @@ function FlowInner() {
           <div ref={reactFlowWrapper} style={{ 
             width: '100%', 
             height: '100%', 
-            backgroundColor: bgConfig.color, // This applies your state color
-            transition: 'background-color 0.3s ease' // Smooth transition when changing
+            backgroundColor: bgConfig.color,
+            transition: 'background-color 0.3s ease'
           }}
       >
             <ReactFlow
@@ -368,11 +416,15 @@ function FlowInner() {
 
               fitView
             >
-              <Controls />
-              <MiniMap />
-             {bgConfig.variant !== 'none' && (
-                <Background variant={bgConfig.variant === 'dots' ? 'dots' : 'lines'} />
-              )}
+            <Controls />
+            <MiniMap />
+            {bgConfig.variant !== 'none' && (
+              <Background 
+                variant={bgConfig.variant === 'dots' ? 'dots' : 'lines'} 
+                // This line handles the pattern visibility in dark mode
+                color={isDarkMode ? 'rgba(255, 255, 255, 0.15)' : '#888'} 
+              />
+            )}
             </ReactFlow>
           </div>
         </div>
@@ -489,11 +541,11 @@ function FlowInner() {
   );
 }
 
-export default function MindMap() {
+export default function MindMap({ isDarkMode, toggleTheme, user }) {
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <ReactFlowProvider>
-        <FlowInner />
+        <FlowInner isDarkMode={isDarkMode} toggleTheme={toggleTheme} user={user} />
       </ReactFlowProvider>
     </div>
   );

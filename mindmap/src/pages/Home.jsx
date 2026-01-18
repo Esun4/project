@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
-export default function Home() {
+export default function Home({ isDarkMode, toggleTheme }) {
   const navigate = useNavigate();
 
   return (
@@ -9,9 +9,28 @@ export default function Home() {
       {/* Navigation Bar */}
       <nav className="home-nav">
         <div className="logo">mindmap.ai</div>
-        <div className="nav-links">
-          <button className="nav-btn-text" onClick={() => navigate("/signin")}>Sign In</button>
-          <button className="create-btn" onClick={() => navigate("/signup")}>Get Started</button>
+        <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          
+          {/* THEME TOGGLE BUTTON - Added here */}
+          <button 
+            className="theme-toggle-btn" 
+            onClick={toggleTheme}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              fontSize: '1.2rem', 
+              cursor: 'pointer' 
+            }}
+          >
+            {isDarkMode ? '☀️' : '🌙'}
+          </button>
+
+          <button className="nav-btn-text" onClick={() => navigate("/signin")}>
+            Sign In
+          </button>
+          <button className="create-btn" onClick={() => navigate("/signup")}>
+            Get Started
+          </button>
         </div>
       </nav>
 

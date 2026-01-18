@@ -1,12 +1,47 @@
 /* src/styles/mindmap.css */
 
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1a1a1a;
+  --border-color: #e2e8f0;
+  --node-bg: #ffffff;
+  --node-border: #555555;
+  --node-text: #000000;
+  --pattern-color: #888888;
+  --sidebar-header-bg: #fcfcfc;
+  --card-bg: #ffffff;
+}
+
+.dark-mode {
+  --bg-color: #121212;
+  --text-color: #f8fafc;
+  --border-color: #334155;
+  --node-bg: #1a1a1a;
+  --node-border: #ffffff;
+  --node-text: #ffffff;
+  --pattern-color: rgba(255, 255, 255, 0.2);
+  --sidebar-header-bg: #1a1a1a;
+  --card-bg: #1e293b;
+}
+
+/* Layout Wrapper */
 .mindmap-page-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.main-layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Topbar */
 .mindmap-topbar {
   width: 100%;
   height: 60px;
@@ -14,11 +49,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  position: relative; /* CRITICAL for absolute centering */
+  position: relative;
 }
 
 .topbar-center {
@@ -38,16 +73,17 @@
 .topbar-title {
   font-size: 1.1rem;
   margin: 0;
-  color: #4a5568;
+  color: var(--text-color); /* Linked to variable */
   font-family: 'Quicksand', sans-serif;
 }
 
-/* Reusable Button Classes */
+/* Reusable Buttons */
 .mm-button {
   padding: 8px 16px;
   border-radius: 6px;
-  border: 1px solid #cbd5e0;
-  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -56,67 +92,28 @@
 }
 
 .mm-button:hover {
-  background: #edf2f7;
+  background: var(--border-color);
+  opacity: 0.9;
 }
 
-.mm-button-primary {
-  background: #d1a34e;
-  color: white;
-  border: none;
+/* Inverted style for primary buttons */
+.mm-button-primary, .save-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
 }
 
-.mm-button-primary:hover {
-  background: #946b1e;
+.dark-mode .mm-button-primary, .dark-mode .save-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #ffffff !important;
 }
 
-/* Layout Wrapper */
-.flow-container {
-  flex-grow: 1;
-  position: relative;
-}
-
-/* Context Menu */
-.mm-context-menu {
-  position: fixed;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  padding: 4px;
-  borderRadius: 8px;
-  z-index: 10000;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-  min-width: 150px;
-  font-family: 'Quicksand', sans-serif;
-}
-
-.mm-context-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 400;
-  transition: background 0.2s;
-}
-
-.mm-context-item:hover {
-  background: #f7fafc;
-}
-
-.mm-context-delete {
-  color: #cc0000;
-}
-
-.mm-context-add {
-  color: #2d3748;
-}
-
-.main-layout-body {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
+/* Sidebar */
 .ai-sidebar {
   width: 300px;
-  background: #ffffff;
-  border-left: 1px solid #e2e8f0;
+  background-color: var(--bg-color);
+  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
@@ -124,8 +121,9 @@
 .ai-sidebar-header {
   padding: 20px;
   font-weight: 700;
-  border-bottom: 1px solid #f0f0f0;
-  background: #fcfcfc;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--sidebar-header-bg);
+  color: var(--text-color);
 }
 
 .ai-sidebar-content {
@@ -135,38 +133,12 @@
 }
 
 .ai-card {
-  padding: 15px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  background: white;
-  transition: all 0.2s ease;
-}
-
-.ai-card:hover { border-color: #4a90e2; transform: translateX(-5px); }
-
-.ai-badge {
-  font-size: 10px;
-  color: #4a90e2;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-}
-
-.ai-glow-node {
-  outline: 3px solid #914ae2 !important;
-  outline-offset: 2px;
-  border-radius: 5px; 
-  z-index: 5000 !important;
-}
-
-/* AI Sidebar Card Improvements */
-.ai-card {
   padding: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   margin-bottom: 12px;
-  background: white;
+  background-color: var(--card-bg);
+  color: var(--text-color);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
   display: flex;
@@ -177,24 +149,53 @@
 .ai-card:hover { 
   border-color: #4a90e2; 
   transform: translateX(-4px); 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Context Menu */
+.mm-context-menu {
+  position: fixed;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 8px;
+  z-index: 10000;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+  min-width: 150px;
+  color: var(--text-color);
+  font-family: 'Quicksand', sans-serif;
+}
+
+.mm-context-item:hover {
+  background-color: var(--border-color);
+}
+
+/* Nodes & Flow */
+.flow-container {
+  flex-grow: 1;
+  position: relative;
+}
+
+.ai-glow-node {
+  outline: 3px solid #914ae2 !important;
+  outline-offset: 2px;
+  border-radius: 5px; 
+  z-index: 5000 !important;
+}
+
+/* UI Feedback */
 .ai-badge {
   font-size: 11px;
   color: #4a90e2;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-/* Empty State Styling */
 .ai-empty {
   text-align: center;
   color: #a0aec0;
   font-style: italic;
   margin-top: 40px;
-  font-size: 0.9rem;
 }
 
 .mm-toast {
@@ -206,19 +207,8 @@
   color: white;
   padding: 12px 24px;
   border-radius: 50px;
-  font-family: 'Quicksand', sans-serif;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* Entrance animation */
   animation: slideDown 0.3s ease-out forwards;
-}
-
-/* The class applied when it's time to leave */
-.mm-toast-exit {
-  animation: fadeOut 0.5s ease-in forwards;
 }
 
 @keyframes slideDown {
@@ -226,7 +216,43 @@
   to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateX(-50%) translateY(0); }
-  to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+.react-flow__controls {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.react-flow__controls-button {
+  background: var(--bg-color) !important;
+  fill: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: background 0.2s;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--border-color) !important;
+}
+
+.react-flow__controls-button svg {
+  fill: var(--text-color);
+}
+
+/* The MiniMap */
+.react-flow__minimap {
+  background-color: var(--bg-color) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* The Mask (the "window" showing your current view) */
+.react-flow__minimap-mask {
+  fill: var(--border-color);
+  opacity: 0.4;
+}
+
+/* Nodes inside the MiniMap */
+.dark-mode .react-flow__minimap-node {
+  fill: #334155 !important;
 }

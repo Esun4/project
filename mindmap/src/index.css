@@ -23,3 +23,31 @@ body {
 .mono-text {
   font-family: 'Google Sans Code', monospace;
 }
+
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1a1a1a;
+  --card-bg: #ffffff;
+  --border-color: #eaeaea;
+  --input-bg: #ffffff;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #f8fafc;
+  --card-bg: #1e1e1e;
+  --border-color: #333333;
+  --input-bg: #2a2a2a;
+  background-color: var(--bg-color); /* Fixes the page flash */
+}
+
+body.dark-mode .auth-btn, 
+body.dark-mode .create-btn {
+  background: #ffffff; /* White buttons in dark mode */
+  color: #000000;      /* Black text in dark mode */
+}
+
+/* Ensure smooth transitions for theme switching */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}

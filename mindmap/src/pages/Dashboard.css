@@ -1,8 +1,9 @@
 /* Dashboard.css */
 .dashboard-container {
   min-height: 100vh;
-  background-color: #ffffff;
-  color: #1a1a1a;
+  /* UPDATED: Uses global variables */
+  background-color: var(--bg-color);
+  color: var(--text-color);
   padding: 60px 10%;
   font-family: 'Quicksand', sans-serif;
 }
@@ -12,7 +13,8 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 60px;
-  border-bottom: 2px solid #f0f0f0;
+  /* UPDATED: Border color variable */
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 20px;
 }
 
@@ -49,15 +51,15 @@
   list-style: none;
 }
 
-/* Updated Card Layout */
 .mindmap-card {
-  background: #ffffff;
-  border: 1px solid #eaeaea;
+  /* UPDATED: Card background and border variables */
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 20px; 
-  height: 300px; /* Taller to fit the preview + title */
+  height: 300px; 
   display: flex;
-  flex-direction: column; /* Stack preview on top of info */
-  overflow: hidden; /* Clips the preview to the rounded corners */
+  flex-direction: column; 
+  overflow: hidden; 
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
@@ -80,10 +82,10 @@
   justify-content: center;
 }
 
-/* The Bottom Info Section */
 .card-info {
   padding: 20px 24px;
-  background: white;
+  /* UPDATED: Card background variable */
+  background: var(--card-bg);
   position: relative;
 }
 
@@ -91,7 +93,8 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 600;
-  color: #1a1a1a;
+  /* UPDATED: Text color variable */
+  color: var(--text-color);
 }
 
 /* Minimalist Dot Hint */

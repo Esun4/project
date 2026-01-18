@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Auth.css";
 
-export default function SignUp() {
+export default function SignUp( {isDarkMode} ) {
   const [form, setForm] = useState({
     name: "",
     username: "",
