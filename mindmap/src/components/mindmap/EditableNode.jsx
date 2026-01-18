@@ -25,6 +25,15 @@ export default function EditableNode({ id, data, selected }) {
 
   const isValid = data.isValidConnection;
 
+  // Style for "Invisible" handles that still work for shortest-path logic
+  const handleStyle = {
+    background: '#000000',       // Dark grey dots
+    border: '1px solid #fff', // White ring around the dot
+    width: '1px',
+    height: '1px',
+    zIndex: 10,
+  };
+
   return (
     <>
       {selected && !editing && <NodeResizer minWidth={120} minHeight={50} />}
@@ -43,25 +52,21 @@ export default function EditableNode({ id, data, selected }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          position: 'relative', // Necessary for handles to absolute position correctly
         }}
         onDoubleClick={() => setEditing(true)}
       >
-        {/* TOP */}
-            <Handle type="target" position={Position.Top} id="t-t" isValidConnection={isValid} />
-            <Handle type="source" position={Position.Top} id="t-s" isValidConnection={isValid} />
+        <Handle type="target" position={Position.Top} id="t" style={handleStyle} isValidConnection={isValid} />
+        <Handle type="source" position={Position.Top} id="t" style={{...handleStyle, opacity: 0}} isValidConnection={isValid} />
 
-            {/* RIGHT */}
-            <Handle type="target" position={Position.Right} id="r-t" isValidConnection={isValid} />
-            <Handle type="source" position={Position.Right} id="r-s" isValidConnection={isValid} />
+        <Handle type="target" position={Position.Right} id="r" style={handleStyle} isValidConnection={isValid} />
+        <Handle type="source" position={Position.Right} id="r" style={{...handleStyle, opacity: 0}} isValidConnection={isValid} />
 
-            {/* BOTTOM */}
-            <Handle type="target" position={Position.Bottom} id="b-t" isValidConnection={isValid} />
-            <Handle type="source" position={Position.Bottom} id="b-s" isValidConnection={isValid} />
+        <Handle type="target" position={Position.Bottom} id="b" style={handleStyle} isValidConnection={isValid} />
+        <Handle type="source" position={Position.Bottom} id="b" style={{...handleStyle, opacity: 0}} isValidConnection={isValid} />
 
-            {/* LEFT */}
-            <Handle type="target" position={Position.Left} id="l-t" isValidConnection={isValid} />
-            <Handle type="source" position={Position.Left} id="l-s" isValidConnection={isValid} />
-
+        <Handle type="target" position={Position.Left} id="l" style={handleStyle} isValidConnection={isValid} />
+        <Handle type="source" position={Position.Left} id="l" style={{...handleStyle, opacity: 0}} isValidConnection={isValid} />
         {editing ? (
           <input
             autoFocus

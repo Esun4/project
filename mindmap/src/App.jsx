@@ -33,6 +33,8 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  console.log("Security Check - User is:", user ? "Logged In" : "Logged Out");
+
   useEffect(() => {
     async function loadMe() {
       try {
@@ -77,8 +79,11 @@ export default function App() {
         element={user ? <Dashboard user={user} /> : <Navigate to="/signin" />}
       />
 
+      <Route
+        path="/mindmap/:id"
+        element={user ? <MindMap user={user} /> : <Navigate to="/signin" />}
+      />
 
-      <Route path="/mindmap/:id" element={<MindMap />} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

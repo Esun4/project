@@ -56,41 +56,63 @@ function FlowInner() {
   const [hoveredSuggestionId, setHoveredSuggestionId] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // AI FETCH LOGIC
-  const runAIAnalysis = useCallback(async (activeNode) => {
-    if (!activeNode?.data?.label || nodes.length < 2) return;
+  // MANUAL AI FETCH LOGIC
+  const handleGetSuggestions = useCallback(async () => {
+    const selectedNode = nodes.find(n => n.id === selectedNodeId);
     
+    // Guard clause
+    if (!selectedNode || !selectedNode.data.label || selectedNode.data.label.toLowerCase().includes('empty')) {
+      alert("Please enter text in the selected node first.");
+      return;
+    }
+
     setIsAnalyzing(true);
+    setAiSuggestions([]);
+
+    // 1. Logic: Identify IDs of nodes already connected to the selected node
+    const alreadyConnectedIds = edges
+      .filter(edge => edge.source === selectedNodeId || edge.target === selectedNodeId)
+      .map(edge => edge.source === selectedNodeId ? edge.target : edge.source);
+
     try {
       const response = await fetch("http://localhost:8000/analyze-similarity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          active_node: { id: activeNode.id, text: activeNode.data.label },
+          active_node: { 
+            id: selectedNode.id, 
+            text: selectedNode.data.label,
+            x: selectedNode.position.x,
+            y: selectedNode.position.y
+          },
+          // 2. Filter: Only send nodes that are NOT the selected one AND NOT already connected
           other_nodes: nodes
-            .filter(n => n.id !== activeNode.id)
-            .map(n => ({ id: n.id, text: n.data.label }))
+            .filter(n => n.id !== selectedNodeId && !alreadyConnectedIds.includes(n.id))
+            .map(n => ({ 
+              id: n.id, 
+              text: n.data.label,
+              x: n.position.x,
+              y: n.position.y
+            }))
         })
       });
-      const results = await response.json();
-      setAiSuggestions(results);
+
+      const data = await response.json();
+      // Ensure data is an array (the backend should return top 3-5 suggestions)
+      setAiSuggestions(Array.isArray(data) ? data : []);
+      
     } catch (err) {
-      console.error("AI Service offline");
+      console.error("AI Service offline", err);
+      alert("Could not connect to the AI service.");
     } finally {
       setIsAnalyzing(false);
     }
-  }, [nodes]);
+  }, [nodes, edges, selectedNodeId]); // Added edges to dependency array
 
   useEffect(() => {
-    if (selectedNodeId) {
-      const active = nodes.find(n => n.id === selectedNodeId);
-      runAIAnalysis(active);
-    } else {
-      setAiSuggestions([]);
-    }
-  }, [selectedNodeId, runAIAnalysis]);
-
-  
+    setAiSuggestions([]);
+    setHoveredSuggestionId(null);
+  }, [selectedNodeId]);
 
   const handleSaveSnapshot = useCallback(async () => {
     if (reactFlowWrapper.current === null) return;
@@ -111,6 +133,16 @@ function FlowInner() {
     console.log("Snapshot generated!", dataUrl);
   }, [state.present, id]);
 
+  const onEdgeClick = useCallback((event, edge) => {
+    setSelectedEdgeId(edge.id);
+    setSelectedNodeId(null); // Hide node inspector while editing edge
+  }, []);
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedEdgeId(null);
+  }, []);
+
   const onNodesChange = useCallback(
     (changes) => set({ nodes: applyNodeChanges(changes, nodes), edges }, false),
     [nodes, edges, set]
@@ -122,7 +154,20 @@ function FlowInner() {
   );
 
   const onConnect = useCallback(
-    (params) => set({ nodes, edges: addEdge({ ...params, style: { ...EDGE_DEFAULTS } }, edges) }),
+    (params) => {
+      // If params has sourceHandle, it means a user manually dragged to a specific dot.
+      // If it's missing (AI connection), React Flow will find the best dot automatically.
+      const edgeData = {
+        ...params, // This keeps the specific handle IDs you dragged to
+        type: 'smoothstep', 
+        style: { stroke: '#000', strokeWidth: 2 },
+      };
+
+      set({ 
+        nodes, 
+        edges: addEdge(edgeData, edges) 
+      });
+    },
     [nodes, edges, set]
   );
 
@@ -213,7 +258,15 @@ function FlowInner() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
-              onSelectionChange={({ nodes }) => setSelectedNodeId(nodes[0]?.id || null)}
+              // ADD THESE THREE PROPS BELOW:
+              onEdgeClick={onEdgeClick}
+              onPaneClick={onPaneClick}
+              onSelectionChange={({ nodes }) => {
+                if (nodes.length > 0) {
+                  setSelectedNodeId(nodes[0].id);
+                  setSelectedEdgeId(null); // Hide edge inspector if node is clicked
+                }
+              }}
               fitView
             >
               <Background />
@@ -223,33 +276,65 @@ function FlowInner() {
           </div>
         </div>
 
-        {/* --- AI SIDEBAR --- */}
         <aside className="ai-sidebar">
           <div className="ai-sidebar-header">
             <span>✨</span> AI Insights
           </div>
           <div className="ai-sidebar-content">
+            {/* 3. Logic: Button is disabled if no node is selected OR if it's currently analyzing */}
+            <button 
+              className="mm-button mm-button-primary" 
+              style={{ 
+                width: '100%', 
+                marginBottom: '20px',
+                opacity: (!selectedNodeId || isAnalyzing) ? 0.6 : 1,
+                cursor: (!selectedNodeId || isAnalyzing) ? 'not-allowed' : 'pointer'
+              }}
+              onClick={handleGetSuggestions}
+              disabled={!selectedNodeId || isAnalyzing}
+            >
+              {isAnalyzing ? "Analyzing..." : "Get AI Suggestions"}
+            </button>
+
             {!selectedNodeId ? (
               <p className="ai-empty">Select a node to see suggestions</p>
-            ) : isAnalyzing ? (
-              <p className="ai-empty">Thinking...</p>
-            ) : aiSuggestions.map(s => (
-              <div 
-                key={s.id} 
-                className="ai-card"
-                onMouseEnter={() => setHoveredSuggestionId(s.id)}
-                onMouseLeave={() => setHoveredSuggestionId(null)}
-              >
-                <div className="ai-badge">{s.score}% Similarity</div>
-                <p>Link to <strong>"{s.label}"</strong>?</p>
-                <button 
-                  className="mm-button mm-button-primary"
-                  onClick={() => onConnect({ source: selectedNodeId, target: s.id })}
-                >
-                  Link Ideas
-                </button>
-              </div>
-            ))}
+            ) : aiSuggestions.length === 0 && !isAnalyzing ? (
+              <p className="ai-empty">No new connections found for this node.</p>
+            ) : (
+              aiSuggestions.map((s) => {
+                const targetNode = nodes.find(n => n.id === s.targetNodeId);
+                const label = targetNode?.data?.label || "Unknown Node";
+                
+                return (
+                  <div 
+                    key={s.targetNodeId} 
+                    className="ai-card"
+                    onMouseEnter={() => setHoveredSuggestionId(s.targetNodeId)}
+                    onMouseLeave={() => setHoveredSuggestionId(null)}
+                  >
+                    <div className="ai-badge">{Math.round(s.score * 100)}% Match</div>
+                    <p style={{ margin: '8px 0', fontSize: '14px' }}>Link to <strong>"{label}"</strong>?</p>
+                    <p style={{ fontSize: '12px', color: '#666', fontStyle: 'italic', marginBottom: '10px' }}>
+                      "{s.explanation}"
+                    </p>
+                    <button 
+                      className="mm-button"
+                      style={{ width: '100%', background: '#000', color: '#fff' }}
+                      onClick={() => {
+                        onConnect({ 
+                          source: selectedNodeId, 
+                          target: s.targetNodeId
+                          // Notice: NO sourceHandle or targetHandle sent here!
+                        });
+                        setAiSuggestions(prev => prev.filter(item => item.targetNodeId !== s.targetNodeId));
+                      }}
+                    >
+                      Connect
+                    </button>
+                  </div>
+                );
+              })
+            )}
           </div>
         </aside>
       </div>

@@ -146,6 +146,45 @@
 }
 
 .ai-glow-node {
-  box-shadow: 0 0 15px 5px rgba(74, 144, 226, 0.5) !important;
-  border: 2px solid #4a90e2 !important;
+  outline: 3px solid #914ae2 !important;
+  outline-offset: 2px;
+  border-radius: 5px; 
+  z-index: 5000 !important;
+}
+
+/* AI Sidebar Card Improvements */
+.ai-card {
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: white;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-card:hover { 
+  border-color: #4a90e2; 
+  transform: translateX(-4px); 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.ai-badge {
+  font-size: 11px;
+  color: #4a90e2;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Empty State Styling */
+.ai-empty {
+  text-align: center;
+  color: #a0aec0;
+  font-style: italic;
+  margin-top: 40px;
+  font-size: 0.9rem;
 }
