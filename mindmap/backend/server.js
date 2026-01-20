@@ -11,7 +11,7 @@ const { Pool } = require("pg");
 
 // creates the server
 const app = express();
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
 
 
 
@@ -161,30 +161,50 @@ app.post("/auth/login", async (req, res) => {
 
 app.post("/mindmaps", async (req, res) => {
     try {
-        // check if the user is signed in
         const userId = req.session.userId;
         if (!userId) return res.status(401).json({ error: "Not logged in" });
 
-        // getting the valid information
-        const { title, data, thumbnail } = req.body;
+        const { id, title, data, thumbnail } = req.body; 
         if (!data) return res.status(400).json({ error: "Missing mindmap data" });
 
-        // adds to the mindmaps database under the user's id
-        const result = await pool.query(
-            `INSERT INTO mindmaps (user_id, title, data, thumbnail)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id`,
-            [userId, title || "Untitled", data, thumbnail || null]
-        );
+        // FIX 1: Ensure 'data' is a JSON string for the JSONB column
+        // If data is already a string, keep it; if it's an object, stringify it.
+        const flowData = typeof data === "string" ? data : JSON.stringify(data);
 
-        res.status(201).json({ id: result.rows[0].id });
+        const numericId = parseInt(id);
+
+        let existingMap = null;
+        if (!isNaN(numericId)) {
+            const check = await pool.query(
+                "SELECT id FROM mindmaps WHERE id = $1 AND user_id = $2",
+                [numericId, userId]
+            );
+            existingMap = check.rows[0];
+        }
+
+        if (existingMap) {
+            const result = await pool.query(
+                `UPDATE mindmaps 
+                 SET title = $1, data = $2, thumbnail = $3, updated_at = CURRENT_TIMESTAMP 
+                 WHERE id = $4 AND user_id = $5
+                 RETURNING id`,
+                [title || "Untitled", flowData, thumbnail || null, numericId, userId]
+            );
+            return res.json({ id: result.rows[0].id, message: "Updated!" });
+        } else {
+            const result = await pool.query(
+                `INSERT INTO mindmaps (user_id, title, data, thumbnail)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING id`,
+                [userId, title || "Untitled", flowData, thumbnail || null]
+            );
+            return res.status(201).json({ id: result.rows[0].id });
+        }
     } catch (err) {
         console.error("Save mindmap error:", err);
         res.status(500).json({ error: "Server error" });
     }
 });
-
-
 
 // get all the mindmaps of the user
 app.get("/mindmaps", async (req, res) => {
@@ -193,10 +213,10 @@ app.get("/mindmaps", async (req, res) => {
         if (!userId) return res.status(401).json({ error: "Not logged in" });
 
         const result = await pool.query(
-            `SELECT id, title, created_at, updated_at
-       FROM mindmaps
-       WHERE user_id = $1
-       ORDER BY updated_at DESC`,
+            `SELECT id, title, thumbnail, data, created_at, updated_at
+            FROM mindmaps
+            WHERE user_id = $1
+            ORDER BY updated_at DESC`,
             [userId]
         );
 
@@ -233,6 +253,20 @@ app.get("/mindmaps/:id", async (req, res) => {
     } catch (err) {
         console.error("Get mindmap error:", err);
         res.status(500).json({ error: "Server error" });
+    }
+});
+
+// delete a mindmap
+app.delete("/mindmaps/:id", async (req, res) => {
+    const userId = req.session.userId;
+    const { id } = req.params;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    try {
+        await pool.query("DELETE FROM mindmaps WHERE id = $1 AND user_id = $2", [id, userId]);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Database error" });
     }
 });
 

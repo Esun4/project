@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+
 import {
   Background,
   Controls,
@@ -9,7 +10,9 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
   useReactFlow,
-  ReactFlowProvider
+  ReactFlowProvider,
+  getNodesBounds,
+  getViewportForBounds
 } from '@xyflow/react';
 import useUndo from 'use-undo';
 import { toPng } from 'html-to-image';
@@ -61,38 +64,23 @@ function FlowInner() {
   const [toast, setToast] = useState({ message: '', visible: false });
   const [bgConfig, setBgConfig] = useState({ variant: 'dots', color: '#ffffff' });
 
+  const [title, setTitle] = useState("Untitled Mindmap");
+  const { fitView } = useReactFlow();
+
   useEffect(() => {
     async function loadMindmap() {
-      // if its a new project it won't look for it in the database
       if (id === "new") return;
-
       try {
-        const res = await fetch(`http://localhost:3000/mindmaps/${id}`, {
-          credentials: "include",
-        });
-
+        const res = await fetch(`http://localhost:3000/mindmaps/${id}`, { credentials: "include" });
         const body = await res.json();
-
-        if (!res.ok) {
-          showToast(body.error || "Failed to load mindmap");
-          return;
+        if (res.ok) {
+          const mm = body.mindmap;
+          set({ nodes: mm.data?.nodes ?? [], edges: mm.data?.edges ?? [] });
+          setTitle(mm.title || "Untitled Mindmap"); // <--- Set title here
+          if (mm.data?.bgConfig) setBgConfig(mm.data.bgConfig);
         }
-
-        const mm = body.mindmap;
-
-        // mm.data should contain { nodes, edges, bgConfig? }
-        const loadedNodes = mm.data?.nodes ?? [];
-        const loadedEdges = mm.data?.edges ?? [];
-
-        // sets the current state the previously saved one
-        set({ nodes: loadedNodes, edges: loadedEdges });
-        showToast("Mindmap loaded");
-      } catch (err) {
-        console.error(err);
-        showToast("Load failed (network/server error)");
-      }
+      } catch (err) { console.error(err); }
     }
-
     loadMindmap();
   }, [id, set]);
 
@@ -168,25 +156,6 @@ function FlowInner() {
     setAiSuggestions([]);
     setHoveredSuggestionId(null);
   }, [selectedNodeId]);
-
-  const handleSaveSnapshot = useCallback(async () => {
-    if (reactFlowWrapper.current === null) return;
-
-    const dataUrl = await toPng(reactFlowWrapper.current, {
-      backgroundColor: bgConfig.color,
-      filter: (node) => {
-        if (
-          node?.classList?.contains('react-flow__controls') ||
-          node?.classList?.contains('react-flow__minimap')
-        ) {
-          return false;
-        }
-        return true;
-      },
-    });
-
-    console.log("Snapshot generated!", dataUrl);
-  }, [state.present, id]);
 
   const onEdgeClick = useCallback((event, edge) => {
     setSelectedEdgeId(edge.id);
@@ -335,19 +304,44 @@ function FlowInner() {
     try {
       if (!reactFlowWrapper.current) return;
 
-      const thumbnailDataUrl = await toPng(reactFlowWrapper.current, {
-        backgroundColor: bgConfig.color,
-        filter: (node) => {
-          if (
-            node?.classList?.contains("react-flow__controls") ||
-            node?.classList?.contains("react-flow__minimap")
-          ) return false;
-          return true;
-        },
-      });
+      const nodesBounds = getNodesBounds(nodes);
+      const width = 1200;
+      const height = 675;
+
+      // Use the updated name: getViewportForBounds
+      const viewport = getViewportForBounds(
+        nodesBounds,
+        width,
+        height,
+        0.2, // min zoom
+        2,   // max zoom
+        0.1  // padding
+      );
+
+      const thumbnailDataUrl = await toPng(
+        document.querySelector('.react-flow__viewport'),
+        {
+          backgroundColor: bgConfig.color,
+          width: width,
+          height: height,
+          style: {
+            width: `${width}px`,
+            height: `${height}px`,
+            // Use the object properties: x, y, and zoom
+            transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+          },
+          filter: (node) => {
+            const exclusionClasses = ['react-flow__controls', 'react-flow__minimap', 'left-toolbar'];
+            return !exclusionClasses.some(cls => node?.classList?.contains?.(cls));
+          }
+        }
+      );
+
+      console.log("Generated Thumbnail:", thumbnailDataUrl);
 
       const payload = {
-        title: id || "Untitled",
+        id: id === "new" ? null : id, 
+        title: title,
         data: { nodes, edges, bgConfig },
         thumbnail: thumbnailDataUrl,
       };
@@ -360,14 +354,18 @@ function FlowInner() {
       });
 
       const result = await res.json();
-      if (!res.ok) return showToast(result.error || "Failed to save mindmap");
+      if (!res.ok) return showToast(result.error || "Failed to save");
 
-      showToast("Saved!");
+      showToast("Saved successfully!");
+
+      if (id === "new" && result.id) {
+        navigate(`/mindmap/${result.id}`, { replace: true });
+      }
     } catch (err) {
       console.error(err);
       showToast("Save failed");
     }
-  }, [id, nodes, edges, bgConfig, showToast]);
+  }, [id, nodes, edges, bgConfig, title, showToast, navigate, fitView]);
 
 
 
@@ -378,7 +376,12 @@ function FlowInner() {
           <button className="mm-button" onClick={() => navigate('/dashboard')}>
             Dashboard
           </button>
-          <h2 className="topbar-title">{id}</h2>
+          <input 
+              className="topbar-title-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter title..."
+            />
         </div>
 
         {/* NEW CENTER SECTION */}

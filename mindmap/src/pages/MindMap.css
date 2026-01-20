@@ -230,3 +230,27 @@
   from { opacity: 1; transform: translateX(-50%) translateY(0); }
   to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
 }
+
+.topbar-title-input {
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 1.1rem;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  color: #4a5568;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: 250px;
+}
+
+.topbar-title-input:hover {
+  background: #f7fafc;
+  border-color: #e2e8f0;
+}
+
+.topbar-title-input:focus {
+  outline: none;
+  background: white;
+  border-color: #d1a34e;
+  box-shadow: 0 0 0 2px rgba(209, 163, 78, 0.2);
+}

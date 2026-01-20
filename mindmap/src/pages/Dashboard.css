@@ -1,7 +1,6 @@
-/* Dashboard.css */
 .dashboard-container {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #fdfdfd;
   color: #1a1a1a;
   padding: 60px 10%;
   font-family: 'Quicksand', sans-serif;
@@ -43,85 +42,194 @@
 
 .mindmap-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Slightly wider for previews */
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 32px;
   padding: 0;
   list-style: none;
 }
 
-/* Updated Card Layout */
 .mindmap-card {
   background: #ffffff;
-  border: 1px solid #eaeaea;
-  border-radius: 20px; 
-  height: 300px; /* Taller to fit the preview + title */
+  border: 1px solid #000000;
+  border-radius: 20px;
+  height: 300px;
   display: flex;
-  flex-direction: column; /* Stack preview on top of info */
-  overflow: hidden; /* Clips the preview to the rounded corners */
+  flex-direction: column; /* Stacks preview on top of info */
+  overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
 }
 
 .mindmap-card:hover {
   transform: scale(1.02);
-  border-color: #000000;
+  /* We removed border-color: #000000; here because the border is already black now */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
-/* The Top Preview Section */
 .card-preview {
-  flex: 1; /* Takes up all available space top-down */
-  background: #fcfcfc; /* Very light grey to look like a canvas */
+  flex: 1; /* This is the "magic" line that pushes the title down */
+  width: 100%;
   position: relative;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #000000;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.card-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Shows the WHOLE image inside the box */
+  padding: 10px;
+  background-color: #ffffff;
+}
+
+.mindmap-card:hover .card-preview img {
+  transform: scale(1.05); 
 }
 
 /* The Bottom Info Section */
 .card-info {
-  padding: 20px 24px;
+  padding: 16px 20px;
   background: white;
-  position: relative;
 }
 
 .card-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Minimalist Dot Hint */
-.mindmap-card::before {
-  content: '';
+.dashboard-ctx-menu {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 6px;
-  height: 6px;
-  background: #000000;
-  border-radius: 50%;
-  opacity: 0.2;
-  z-index: 2;
-  transition: opacity 0.3s ease;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  z-index: 1000;
+  min-width: 160px;
 }
 
-.mindmap-card:hover::before {
-  opacity: 1;
+.ctx-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-/* Placeholder image styling */
-.card-preview img {
+.ctx-item:hover {
+  background: #f5f5f5;
+}
+
+.ctx-delete {
+  color: #e53e3e;
+  border-top: 1px solid #eee;
+}
+
+.inline-rename-input {
+  width: 100%;
+  border: 1px solid #3b3b3b;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+  background: white;
+}
+
+.card-info {
+  padding: 16px 20px;
+  min-height: 10px; /* Ensures the card height doesn't jump when switching to input */
+  display: flex;
+  align-items: center;
+}
+
+/* Modal Overlay - Blurs the background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* This makes the zoomed-out look possible */
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
-.mindmap-card:hover .card-preview img {
-  opacity: 1;
+/* The Modal Box */
+.custom-modal {
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #000;
+  animation: modalAppear 0.2s ease-out;
+}
+
+.custom-modal h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.custom-modal p {
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.cancel-btn:hover {
+  background: #cfcfcf;
+}
+
+.delete-confirm-btn {
+  background: #cc5151;
+  color: white;
+}
+
+.delete-confirm-btn:hover {
+  background: #9c3e3e;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
