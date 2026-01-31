@@ -92,7 +92,14 @@ A full-stack web application that allows users to create, save, and revisit inte
 
 ---
 
-## ▶️ Running the Project Locally
+## Running the Project Locally
+
+Ensure Docker and Docker Compose are installed on your machine.
 
 ```bash
 docker compose up --build
+```
+
+Once everything is runnning open your browser and navigate to:
+
+http://localhost:5173
