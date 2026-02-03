@@ -69,6 +69,23 @@ app.get("/auth/me", async (req, res) => {
     }
 });
 
+app.post("/auth/logout", (req, res) => {
+    const cookieOptions = {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+    };
+
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Logout error:", err);
+            return res.status(500).json({ error: "Failed to log out" });
+        }
+        res.clearCookie("sid", cookieOptions);
+        return res.json({ ok: true });
+    });
+});
+
 app.get("/db-test", async (req, res) => {
     const result = await pool.query("SELECT NOW()");
 

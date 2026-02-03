@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Dashboard.css";
 
-export default function Dashboard() {
+export default function Dashboard({ setUser }) {
   const navigate = useNavigate();
 
   const [mindmaps, setMindmaps] = useState([]);
@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [isRenaming, setIsRenaming] = useState(null);
   const [editTitle, setEditTitle] = useState("");    
   const [deleteConfirm, setDeleteConfirm] = useState({ visible: false, mapId: null });
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleContextMenu = (e, map) => {
     e.preventDefault();
@@ -95,13 +96,45 @@ export default function Dashboard() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      const res = await fetch("http://localhost:3000/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("Failed to sign out");
+        return;
+      }
+
+      setUser?.(null);
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1 className="dashboard-title">My Workspace</h1>
-        <button className="create-btn" onClick={() => navigate("/mindmap/new")}>
-          + New Project
-        </button>
+        <div className="dashboard-actions">
+          <button className="create-btn" onClick={() => navigate("/mindmap/new")}>
+            + New Project
+          </button>
+          <button
+            className="signout-btn"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
+          </button>
+        </div>
       </header>
 
       {mindmaps.length === 0 ? (

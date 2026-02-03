@@ -76,7 +76,7 @@ export default function App() {
 
       <Route
         path="/dashboard"
-        element={user ? <Dashboard user={user} /> : <Navigate to="/signin" />}
+        element={user ? <Dashboard setUser={setUser} /> : <Navigate to="/" />}
       />
 
       <Route
